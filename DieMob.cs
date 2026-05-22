@@ -8,9 +8,10 @@ using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
 using TShockAPI.DB;
-using Mono.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
+using Microsoft.Xna.Framework;
 
 namespace DieMob
 {
@@ -29,7 +30,7 @@ namespace DieMob
         public bool AffectFriendlyNPCs = false;
         public bool AffectStatueSpawns= false;
     }
-    [ApiVersion(1, 15)]
+    [ApiVersion(2, 1)]
     public class DieMobMain : TerrariaPlugin
     {
         private static IDbConnection db;
@@ -84,17 +85,17 @@ namespace DieMob
         private void SetupDb()
         {          
             string sql = Path.Combine(savepath, "DieMob.sqlite");
-            db = new SqliteConnection(string.Format("uri=file://{0},Version=3", sql));            
-            SqlTableCreator SQLcreator = new SqlTableCreator(db,(IQueryBuilder)new SqliteQueryCreator());
+            db = new SqliteConnection(string.Format("Data Source={0}", sql));
+            SqlTableCreator SQLcreator = new SqlTableCreator(db, db.GetSqlType() == SqlType.Sqlite ? (TShockAPI.DB.Queries.IQueryBuilder)new TShockAPI.DB.Queries.SqliteQueryBuilder() : new TShockAPI.DB.Queries.MysqlQueryBuilder());
             var table = new SqlTable("DieMobRegions",
-             new SqlColumn("Region", MySqlDbType.VarChar) { Primary = true, Unique = true, Length = 30 },
-             new SqlColumn("WorldID", MySqlDbType.Int32),
-             new SqlColumn("AffectFriendlyNPCs", MySqlDbType.Int32),
-             new SqlColumn("AffectStatueSpawns", MySqlDbType.Int32),
-             new SqlColumn("ReplaceMobs", MySqlDbType.Text),
-             new SqlColumn("Type", MySqlDbType.Int32)
+             new SqlColumn("Region", MySql.Data.MySqlClient.MySqlDbType.VarChar) { Primary = true, Unique = true, Length = 30 },
+             new SqlColumn("WorldID", MySql.Data.MySqlClient.MySqlDbType.Int32),
+             new SqlColumn("AffectFriendlyNPCs", MySql.Data.MySqlClient.MySqlDbType.Int32),
+             new SqlColumn("AffectStatueSpawns", MySql.Data.MySqlClient.MySqlDbType.Int32),
+             new SqlColumn("ReplaceMobs", MySql.Data.MySqlClient.MySqlDbType.Text),
+             new SqlColumn("Type", MySql.Data.MySqlClient.MySqlDbType.Int32)
             );
-            SQLcreator.EnsureExists(table);
+            SQLcreator.EnsureTableStructure(table);
             //
         }
 
@@ -122,7 +123,7 @@ namespace DieMob
             }
             catch (Exception ex)
             {
-                Log.ConsoleError(ex.Message);
+                TShock.Log.ConsoleError(ex.Message);
                 config = new Config();
             }
         }
@@ -146,14 +147,14 @@ namespace DieMob
                 }
                 else
                 {
-                    Log.ConsoleError("DieMob config not found. Creating new one");
+                    TShock.Log.ConsoleError("DieMob config not found. Creating new one");
                     CreateConfig();
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                Log.ConsoleError(ex.Message);
+                TShock.Log.ConsoleError(ex.Message);
             }
             return false;
         }
@@ -197,7 +198,7 @@ namespace DieMob
                                         if (Region.ReplaceMobs.ContainsKey(npc.netID))
                                         {
                                             npc.SetDefaults(Region.ReplaceMobs[npc.netID]);
-                                            NetMessage.SendData((int)PacketTypes.NpcUpdate, -1, -1, "", i);
+                                            NetMessage.SendData((int)PacketTypes.NpcUpdate, -1, -1, null, i);
                                         }
                                         else if (Region.Type == RegionType.Repel)
                                         {
@@ -209,12 +210,12 @@ namespace DieMob
                                             if (area.Right - (int)(npc.position.X / 16) < area.Width / 2)
                                                 xDir = 10;
                                             npc.velocity = new Vector2(xDir * config.RepelPowerModifier, yDir * config.RepelPowerModifier);
-                                            NetMessage.SendData((int)PacketTypes.NpcUpdate, -1, -1, "", i);
+                                            NetMessage.SendData((int)PacketTypes.NpcUpdate, -1, -1, null, i);
                                         }
                                         else if (Region.Type == RegionType.Kill)
                                         {
-                                            Main.npc[i].netDefaults(0);
-                                            TSPlayer.Server.StrikeNPC(i, 99999, 90f, 1);
+                                            Main.npc[i].active = false;
+                                            NetMessage.SendData((int)PacketTypes.NpcUpdate, -1, -1, null, i);
                                         }
                                     }
                                 }
@@ -225,7 +226,7 @@ namespace DieMob
                 }
                 catch (Exception e)
                 {
-                    Log.ConsoleError(e.Message);
+                    TShock.Log.ConsoleError(e.Message);
                 }
             }
         }
