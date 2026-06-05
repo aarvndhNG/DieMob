@@ -181,7 +181,7 @@ namespace DieMob
                         if (RegionList[r].TSRegion == null)
                         {
                             
-                            db.Query("Delete from DieMobRegions where Region = @0 AND WorldID = @1", RegionList[r].TSRegion.Name, Main.worldID);                            
+                            db.Query("Delete from DieMobRegions where Region = @0 AND WorldID = @1", RegionList[r].RegionName, Main.worldID);
                             RegionList.RemoveAt(r);
                             continue;
                         }
@@ -244,7 +244,7 @@ namespace DieMob
             {
                 for (int r = RegionList.Count - 1; r >= 0; r--)
                 {
-                    var regManReg = TShock.Regions.GetRegionByName(RegionList[r].TSRegion.Name);
+                    var regManReg = TShock.Regions.GetRegionByName(RegionList[r].RegionName);
                     if (RegionList[r].TSRegion == null || regManReg == null || regManReg.Name == "")
                     {
                       
@@ -263,7 +263,7 @@ namespace DieMob
                 for (int i = page; i < RegionList.Count; i++)
                 {
                     if (i < page + 6)
-                        args.Player.SendMessage(String.Format("{0} @ X: {1}, Y: {2}", RegionList[i].TSRegion.Name, RegionList[i].TSRegion.Area.X, RegionList[i].TSRegion.Area.Y), Color.BurlyWood);
+                        args.Player.SendMessage(String.Format("{0} @ X: {1}, Y: {2}", RegionList[i].RegionName, RegionList[i].TSRegion.Area.X, RegionList[i].TSRegion.Area.Y), Color.BurlyWood);
                 }
                 return;
             }
@@ -328,17 +328,17 @@ namespace DieMob
                                         if (args.Parameters[3].ToLower() == "repel")
                                         {
                                             region.Type = RegionType.Repel;
-                                            args.Player.SendMessage(String.Format("Region {0} is now repeling mobs", region.TSRegion.Name), Color.LightSalmon);
+                                            args.Player.SendMessage(String.Format("Region {0} is now repeling mobs", region.RegionName), Color.LightSalmon);
                                         }
                                         else if (args.Parameters[3].ToLower() == "passive")
                                         {
                                             region.Type = RegionType.Passive;
-                                            args.Player.SendMessage(String.Format("Region {0} is now passive", region.TSRegion.Name), Color.LightSalmon);
+                                            args.Player.SendMessage(String.Format("Region {0} is now passive", region.RegionName), Color.LightSalmon);
                                         }
                                         else
                                         {
                                             region.Type = RegionType.Kill;
-                                            args.Player.SendMessage(String.Format("Region {0} is now killing mobs", region.TSRegion.Name), Color.LightSalmon);
+                                            args.Player.SendMessage(String.Format("Region {0} is now killing mobs", region.RegionName), Color.LightSalmon);
                                         }
                                         Diemob_Update(region);
                                         return;
@@ -352,12 +352,12 @@ namespace DieMob
                                         if (args.Parameters[3].ToLower() == "true")
                                         {
                                             region.AffectFriendlyNPCs = true;
-                                            args.Player.SendMessage(String.Format("Region {0} is now affecting friendly NPCs", region.TSRegion.Name), Color.LightSalmon);
+                                            args.Player.SendMessage(String.Format("Region {0} is now affecting friendly NPCs", region.RegionName), Color.LightSalmon);
                                         }
                                         else
                                         {
                                             region.AffectFriendlyNPCs = false;
-                                            args.Player.SendMessage(String.Format("Region {0} is no longer affecting friendly NPCs", region.TSRegion.Name), Color.LightSalmon);
+                                            args.Player.SendMessage(String.Format("Region {0} is no longer affecting friendly NPCs", region.RegionName), Color.LightSalmon);
                                         }
                                         Diemob_Update(region);
                                         return;
@@ -371,12 +371,12 @@ namespace DieMob
                                         if (args.Parameters[3].ToLower() == "true")
                                         {
                                             region.AffectStatueSpawns = true;
-                                            args.Player.SendMessage(String.Format("Region {0} is now affecting statue spawned mobs", region.TSRegion.Name), Color.LightSalmon);
+                                            args.Player.SendMessage(String.Format("Region {0} is now affecting statue spawned mobs", region.RegionName), Color.LightSalmon);
                                         }
                                         else
                                         {
                                             region.AffectStatueSpawns = false;
-                                            args.Player.SendMessage(String.Format("Region {0} is no longer affecting statue spawned mobs", region.TSRegion.Name), Color.LightSalmon);
+                                            args.Player.SendMessage(String.Format("Region {0} is no longer affecting statue spawned mobs", region.RegionName), Color.LightSalmon);
                                         }
                                         Diemob_Update(region);
                                         return;
@@ -392,11 +392,11 @@ namespace DieMob
                                         {
                                             if (region.ReplaceMobs.ContainsKey(fromMobID))
                                             {
-                                                args.Player.SendMessage(String.Format("Region {0} already is already converting mobID {1} to mob {2}", region.TSRegion.Name, fromMobID, region.ReplaceMobs[fromMobID]), Color.LightSalmon);
+                                                args.Player.SendMessage(String.Format("Region {0} already is already converting mobID {1} to mob {2}", region.RegionName, fromMobID, region.ReplaceMobs[fromMobID]), Color.LightSalmon);
                                                 return;
                                             }
                                             region.ReplaceMobs.Add(fromMobID, toMobID);
-                                            args.Player.SendMessage(String.Format("Region {0} is now converting mobs with id {1} to mobs {2}", region.TSRegion.Name, fromMobID, toMobID), Color.LightSalmon);
+                                            args.Player.SendMessage(String.Format("Region {0} is now converting mobs with id {1} to mobs {2}", region.RegionName, fromMobID, toMobID), Color.LightSalmon);
                                             Diemob_Update(region);
                                             return;
                                         }
@@ -404,7 +404,7 @@ namespace DieMob
                                         {
                                             if (region.ReplaceMobs.ContainsKey(fromMobID))
                                                 region.ReplaceMobs.Remove(fromMobID);
-                                            args.Player.SendMessage(String.Format("Region {0} is no longer converting mobs with id {1}", region.TSRegion.Name, fromMobID), Color.LightSalmon);
+                                            args.Player.SendMessage(String.Format("Region {0} is no longer converting mobs with id {1}", region.RegionName, fromMobID), Color.LightSalmon);
                                             Diemob_Update(region);
                                             return;
                                         }
@@ -439,7 +439,7 @@ namespace DieMob
                             args.Player.SendMessage(String.Format("Error adding '{0}' to DieMob list. Check log for details", region.Name), Color.Red);
                             return;
                         }
-                        RegionList.Add(new DieMobRegion() { TSRegion = region });
+                        RegionList.Add(new DieMobRegion() { TSRegion = region, RegionName = region.Name });
                         args.Player.SendMessage(String.Format("Region '{0}' added to DieMob list", region.Name), Color.BurlyWood);
                         return;
                     }
@@ -510,13 +510,13 @@ namespace DieMob
         }
         private static void Diemob_Update(DieMobRegion region)
         {
-            db.Query("UPDATE DieMobRegions SET AffectFriendlyNPCs = @2, AffectStatueSpawns = @3, Type = @4, ReplaceMobs = @5 where Region = @0 AND WorldID = @1", region.TSRegion.Name.ToLower(), Main.worldID, region.AffectFriendlyNPCs, region.AffectStatueSpawns, (int)region.Type, JsonConvert.SerializeObject(region.ReplaceMobs));
+            db.Query("UPDATE DieMobRegions SET AffectFriendlyNPCs = @2, AffectStatueSpawns = @3, Type = @4, ReplaceMobs = @5 where Region = @0 AND WorldID = @1", region.RegionName.ToLower(), Main.worldID, region.AffectFriendlyNPCs, region.AffectStatueSpawns, (int)region.Type, JsonConvert.SerializeObject(region.ReplaceMobs));
         }
         private static DieMobRegion GetRegionByName(string name)
         {
             foreach (DieMobRegion reg in RegionList)
             {
-                if (reg.TSRegion.Name.ToLower() == name.ToLower())
+                if (reg.RegionName.ToLower() == name.ToLower())
                     return reg;
             }
             return null;
